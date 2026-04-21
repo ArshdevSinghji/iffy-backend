@@ -1,0 +1,55 @@
+import mongoose, { HydratedDocument, Schema, InferSchemaType } from "mongoose";
+import mongooseDelete, { SoftDeleteModel } from "mongoose-delete";
+
+import { encryptChatText } from "../../../utils/chat-crypto";
+
+const chatSchema = new Schema(
+  {
+    room_id: {
+      type: Schema.Types.ObjectId,
+      ref: "Room",
+      required: true,
+      index: true,
+    },
+    sender_id: {
+      type: Schema.Types.ObjectId,
+      index: true,
+    },
+    text: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["sent", "delivered", "read"] as const,
+      default: "sent",
+    },
+  },
+  { timestamps: true },
+);
+
+export type TChat = InferSchemaType<typeof chatSchema>;
+export type ChatDocument = HydratedDocument<TChat> & {
+  delete: () => Promise<unknown>;
+};
+
+chatSchema.plugin(mongooseDelete, {
+  deletedAt: true,
+  overrideMethods: "all",
+});
+
+chatSchema.methods.deleteMessage = function (this: ChatDocument) {
+  return this.delete();
+};
+
+chatSchema.methods.updateMessage = function (
+  this: ChatDocument,
+  updatedText: string,
+) {
+  this.text = encryptChatText(updatedText);
+  return this.save();
+};
+
+const Chat = mongoose.model<TChat, SoftDeleteModel<TChat>>("Chat", chatSchema);
+
+export default Chat;
