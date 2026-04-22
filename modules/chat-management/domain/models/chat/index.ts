@@ -29,9 +29,12 @@ const chatSchema = new Schema(
 );
 
 export type TChat = InferSchemaType<typeof chatSchema>;
-export type ChatDocument = HydratedDocument<TChat> & {
-  delete: () => Promise<unknown>;
+type ChatMethods = {
+  deleteMessage: () => Promise<unknown>;
+  updateMessage: (updatedText: string) => Promise<unknown>;
 };
+
+export type ChatDocument = HydratedDocument<TChat> & ChatMethods;
 
 chatSchema.plugin(mongooseDelete, {
   deletedAt: true,

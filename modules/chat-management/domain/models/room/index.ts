@@ -33,7 +33,28 @@ const roomSchema = new Schema(
 );
 
 export type TRoom = InferSchemaType<typeof roomSchema>;
-export type RoomDocument = HydratedDocument<TRoom>;
+type RoomMethods = {
+  updateLastMessage: (
+    text: string,
+    senderId: mongoose.Types.ObjectId | string,
+  ) => Promise<unknown>;
+  incrementUnreadMessages: (
+    userId: mongoose.Types.ObjectId | string,
+  ) => Promise<unknown>;
+  decrementUnreadMessages: (
+    userId: mongoose.Types.ObjectId | string,
+  ) => Promise<unknown>;
+  resetUnreadMessages: (
+    userId: mongoose.Types.ObjectId | string,
+  ) => Promise<unknown>;
+  updateParticipantPersona: (
+    userId: mongoose.Types.ObjectId | string,
+    persona: string,
+  ) => Promise<unknown>;
+  deleteRoom: () => Promise<unknown>;
+};
+
+export type RoomDocument = HydratedDocument<TRoom> & RoomMethods;
 
 roomSchema.methods.updateLastMessage = function (
   this: RoomDocument,
