@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: OpenAPI specification for chat-management module routes.
 servers:
-  - url: /
+  - url: "http://localhost:8000"
 tags:
   - name: Chats
 paths:
@@ -91,7 +91,19 @@ components:
             type: string
     Partner:
       type: object
-      additionalProperties: true
+      properties:
+        _id:
+          $ref: "#/components/schemas/ObjectId"
+        name:
+          type: string
+        glimpses:
+          type: array
+          items:
+            type: object
+            properties:
+              imageURL:
+                type: string
+                format: uri
     LastMessage:
       type: object
       properties:
@@ -105,7 +117,7 @@ components:
           type: string
           format: date-time
           nullable: true
-      additionalProperties: true
+      additionalProperties: false
     RoomSummary:
       type: object
       properties:
@@ -119,7 +131,7 @@ components:
           type: integer
         isDeleted:
           type: boolean
-      additionalProperties: true
+      additionalProperties: false
     PaginatedChatsResponse:
       type: object
       required: [chats, total]
@@ -132,4 +144,21 @@ components:
           type: integer
     ChatMessage:
       type: object
-      additionalProperties: true
+      properties:
+        _id:
+          $ref: "#/components/schemas/ObjectId"
+        room_id:
+          $ref: "#/components/schemas/ObjectId"
+        sender_id:
+          $ref: "#/components/schemas/ObjectId"
+        text:
+          type: string
+        status:
+          type: string
+          enum: [sent, delivered, read]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

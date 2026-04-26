@@ -23,10 +23,7 @@ export const updateUserHandler = catchErrors(
       isProfileComplete: user.isProfileComplete ? user.isProfileComplete : true,
     };
 
-    const result = await UserRepository.updateUserDetails(
-      params.userID,
-      payload,
-    );
+    await UserRepository.updateUserDetails(params.userID, payload);
 
     res.status(200).json({ message: "User updated successfully" });
   },
