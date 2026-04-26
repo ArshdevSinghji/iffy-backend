@@ -1,15 +1,27 @@
-import { createServer, Server as HttpServer } from "http";
+import { Server as HttpServer } from "http";
 import jwt from "jsonwebtoken";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
+import { chatHandler } from "../socket/chat.handler";
 
-import chatHandler from "./chat-handler";
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-let io: Server | undefined;
+export type AuthedSocket = Socket & { userId: string };
 
-const initSocket = (server: HttpServer) => {
+// ─── Singleton ────────────────────────────────────────────────────────────────
+
+let io: Server | null = null;
+
+export const getIO = (): Server => {
+  if (!io) throw new Error("Socket.io not initialized");
+  return io;
+};
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+export const initSocket = (server: HttpServer): void => {
   io = new Server(server, {
     cors: {
-      origin: process.env.CORS_ORIGIN?.split(",") || [],
+      origin: process.env.CORS_ORIGIN?.split(",") ?? [],
       methods: ["GET", "POST", "PUT", "DELETE"],
       credentials: true,
     },
@@ -17,37 +29,30 @@ const initSocket = (server: HttpServer) => {
     transports: ["polling"],
   });
 
-  io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
-    if (!token) {
-      return next(new Error("Authentication error"));
-    }
-
-    jwt.verify(token, process.env.JWT_SECRET || "", (err, decoded) => {
-      if (err) {
-        return next(new Error("Authentication error"));
-      }
-
-      (socket as typeof socket & { userId: string }).userId = String(
-        (decoded as { sub?: string }).sub,
-      );
-      next();
-    });
-  });
+  io.use(authMiddleware);
 
   io.on("connection", (socket) => {
-    const authedSocket = socket as typeof socket & { userId: string };
-    authedSocket.join(authedSocket.userId.toString());
+    const authedSocket = socket as AuthedSocket;
+    authedSocket.join(authedSocket.userId);
     chatHandler(io as Server, authedSocket);
   });
 };
 
-const getIO = () => {
-  if (!io) {
-    throw new Error("Socket.io not initialized!");
+// ─── Auth Middleware ──────────────────────────────────────────────────────────
+
+const authMiddleware = (socket: Socket, next: (err?: Error) => void): void => {
+  const token = socket.handshake.auth.token as string | undefined;
+
+  if (!token) {
+    return next(new Error("Authentication error: no token provided"));
   }
 
-  return io;
-};
+  jwt.verify(token, process.env.JWT_SECRET ?? "", (err, decoded) => {
+    if (err || !decoded) {
+      return next(new Error("Authentication error: invalid token"));
+    }
 
-export { getIO, initSocket };
+    (socket as AuthedSocket).userId = String((decoded as { sub?: string }).sub);
+    next();
+  });
+};
