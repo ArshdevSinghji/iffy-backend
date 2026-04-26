@@ -4,6 +4,6 @@ import { insertPromptsHandler } from "./insert-prompts.handler";
 
 const router = Router();
 
-router.put("/:userID/prompts", insertPromptsHandler);
+router.post("/:userID/prompts", insertPromptsHandler);
 
 export default router;

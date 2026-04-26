@@ -27,6 +27,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/RoomSummary"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
   /chats/{roomId}:
     get:
       tags: [Chats]
@@ -55,20 +57,38 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [chats, total]
-                properties:
-                  chats:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/ChatMessage"
-                  total:
-                    type: integer
+                $ref: "#/components/schemas/PaginatedChatsResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
 components:
+  responses:
+    InternalServerErrorResponse:
+      description: Unexpected server-side failure
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
     ObjectId:
       type: string
       pattern: "^[a-fA-F0-9]{24}$"
+    ErrorResponse:
+      type: object
+      required: [success, code, message]
+      properties:
+        success:
+          type: boolean
+          example: false
+        code:
+          type: string
+          example: INTERNAL_SERVER_ERROR
+        message:
+          type: string
+          example: An unexpected error occurred
+        fields:
+          type: object
+          additionalProperties:
+            type: string
     Partner:
       type: object
       additionalProperties: true
@@ -78,9 +98,9 @@ components:
         text:
           type: string
         sender_id:
-          oneOf:
-            - $ref: "#/components/schemas/ObjectId"
-            - type: "null"
+          type: string
+          pattern: "^[a-fA-F0-9]{24}$"
+          nullable: true
         timestamp:
           type: string
           format: date-time
@@ -100,6 +120,16 @@ components:
         isDeleted:
           type: boolean
       additionalProperties: true
+    PaginatedChatsResponse:
+      type: object
+      required: [chats, total]
+      properties:
+        chats:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+        total:
+          type: integer
     ChatMessage:
       type: object
       additionalProperties: true

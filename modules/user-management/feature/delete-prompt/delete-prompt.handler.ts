@@ -22,14 +22,11 @@ export const deletePromptHandler = catchErrors(
       throw new NotFoundError("Prompt");
     }
 
-    const result = await UserRepository.deletePrompt(
+    await UserRepository.deletePrompt(
       params.userID,
       params.promptID,
     );
 
-    res.status(200).json({
-      message: "Prompt deleted successfully",
-      result,
-    });
+    res.status(200).json({message: "Prompt deleted successfully"});
   },
 );

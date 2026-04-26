@@ -18,14 +18,11 @@ export const insertPromptsHandler = catchErrors(
       throw new NotFoundError("User");
     }
 
-    const result = await UserRepository.addBulkPrompts(
+    await UserRepository.addBulkPrompts(
       params.userID,
       body.prompts,
     );
 
-    res.status(201).json({
-      message: "Bulk prompts added successfully",
-      result,
-    });
+    res.status(201).json({message: "Prompts added successfully"});
   },
 );

@@ -26,15 +26,12 @@ export const updatePromptHandler = catchErrors(
       throw new NotFoundError("Prompt");
     }
 
-    const result = await UserRepository.updatePrompt(
+    await UserRepository.updatePrompt(
       params.userID,
       params.promptID,
       body.prompts,
     );
 
-    res.status(201).json({
-      message: "Prompt updated successfully",
-      result,
-    });
+    res.status(200).json({ message: "Prompt updated successfully" });
   },
 );

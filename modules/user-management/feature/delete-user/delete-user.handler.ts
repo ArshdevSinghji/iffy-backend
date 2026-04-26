@@ -14,7 +14,7 @@ export const deleteUserHandler = catchErrors(
       throw new NotFoundError("User");
     }
 
-    const result = await UserRepository.deleteUser(params.userID);
-    res.status(201).json({ message: "User deleted successfully", result });
+    await UserRepository.deleteUser(params.userID);
+    res.status(200).json({ message: "User deleted successfully" });
   },
 );

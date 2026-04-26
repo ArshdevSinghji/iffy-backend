@@ -28,10 +28,6 @@ export const updateUserHandler = catchErrors(
       payload,
     );
 
-    res.status(201).json({
-      message: "User updated successfully",
-      result,
-      data: payload,
-    });
+    res.status(200).json({ message: "User updated successfully" });
   },
 );

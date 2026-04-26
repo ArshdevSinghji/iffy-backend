@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: OpenAPI specification for user-management module routes.
 servers:
-  - url: /
+  - url: http://localhost:8000
 tags:
   - name: Users
   - name: Prompts
@@ -28,6 +28,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
     get:
       tags: [Users]
       summary: List users with filters
@@ -62,7 +64,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/User"
+                  $ref: "#/components/schemas/UserWithGlimpses"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
   /users/{userID}:
     get:
       tags: [Users]
@@ -80,6 +86,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
     put:
       tags: [Users]
       summary: Update user
@@ -97,8 +107,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
     delete:
       tags: [Users]
       summary: Delete user
@@ -110,10 +123,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
   /users/{userID}/prompts:
-    put:
+    post:
       tags: [Prompts]
       summary: Insert prompts in bulk
       parameters:
@@ -125,13 +141,16 @@ paths:
             schema:
               $ref: "#/components/schemas/InsertPromptsBody"
       responses:
-        "200":
+        "201":
           description: Prompts inserted
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
   /users/{userID}/prompts/{promptID}:
     put:
       tags: [Prompts]
@@ -151,8 +170,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
     delete:
       tags: [Prompts]
       summary: Delete prompt
@@ -165,8 +187,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
   /users/{userID}/likers:
     get:
       tags: [Interaction]
@@ -183,6 +208,8 @@ paths:
                 items:
                   type: object
                   additionalProperties: true
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
   /users/{userID}/glimpses:
     get:
       tags: [Glimpses]
@@ -198,6 +225,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Glimpse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
     post:
       tags: [Glimpses]
       summary: Create glimpse
@@ -216,6 +245,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Glimpse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
   /users/{userID}/glimpses/{glimpseID}:
     delete:
       tags: [Glimpses]
@@ -229,8 +262,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
   /interaction/like:
     post:
       tags: [Interaction]
@@ -247,8 +283,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/InteractionRecordedResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
   /interaction/dislike:
     post:
       tags: [Interaction]
@@ -265,9 +302,29 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/InteractionRecordedResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
 components:
+  responses:
+    BadRequestResponse:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFoundResponse:
+      description: Requested resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerErrorResponse:
+      description: Unexpected server-side failure
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   parameters:
     UserIDPath:
       name: userID
@@ -297,12 +354,187 @@ components:
     ObjectId:
       type: string
       pattern: "^[a-fA-F0-9]{24}$"
+    ErrorResponse:
+      type: object
+      required: [success, code, message]
+      properties:
+        success:
+          type: boolean
+          example: false
+        code:
+          type: string
+          example: NOT_FOUND
+        message:
+          type: string
+          example: User not found
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+    MessageResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+    MessageWithResultResponse:
+      type: object
+      required: [message, result]
+      properties:
+        message:
+          type: string
+        result:
+          type: object
+          additionalProperties: true
+    InteractionRecordedResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: Interaction recorded
+    Prompt:
+      type: object
+      required: [question, answer]
+      properties:
+        question:
+          type: string
+        answer:
+          type: string
+    Coordinates:
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: number
+    Location:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [Point]
+        coordinates:
+          $ref: "#/components/schemas/Coordinates"
+    PlaceOfBirth:
+      type: object
+      properties:
+        latitude:
+          type: number
+        longitude:
+          type: number
+    Interests:
+      type: object
+      properties:
+        coreActivities:
+          type: array
+          items:
+            type: string
+        mediaConsumption:
+          type: array
+          items:
+            type: string
+        lifestyle:
+          type: array
+          items:
+            type: string
+        datingPreferences:
+          type: array
+          items:
+            type: string
     User:
       type: object
-      additionalProperties: true
+      required: [_id, userID]
+      properties:
+        _id:
+          $ref: "#/components/schemas/ObjectId"
+        userID:
+          type: string
+        name:
+          type: string
+          nullable: true
+        dob:
+          type: string
+          format: date-time
+          nullable: true
+        place_of_birth:
+          $ref: "#/components/schemas/PlaceOfBirth"
+        gender:
+          type: string
+          nullable: true
+        orientation:
+          type: string
+          nullable: true
+        bio:
+          type: string
+        location:
+          $ref: "#/components/schemas/Location"
+        prompts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Prompt"
+        interests:
+          $ref: "#/components/schemas/Interests"
+        event:
+          type: string
+          nullable: true
+        persona:
+          type: string
+        isActive:
+          type: boolean
+        lastActive:
+          type: string
+          format: date-time
+        isProfileComplete:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deleted:
+          type: boolean
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+    UserWithGlimpses:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/User"
+      properties:
+        glimpses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Glimpse"
     Glimpse:
       type: object
-      additionalProperties: true
+      required: [_id, userID, imageURL]
+      properties:
+        _id:
+          $ref: "#/components/schemas/ObjectId"
+        userID:
+          $ref: "#/components/schemas/ObjectId"
+        imageURL:
+          type: string
+          format: uri
+        caption:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deleted:
+          type: boolean
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
     CreateUserBody:
       type: object
       required: [uid]
