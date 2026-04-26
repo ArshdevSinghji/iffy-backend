@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { deleteUserHandler } from "./delete-user.handler";
 
-const router = new Router();
+const router = Router();
 
 router.delete("/:userID", deleteUserHandler);
 

@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { listLikersHandler } from "./list-likers.handler";
 
-const router = new Router();
+const router = Router();
 
 router.get("/:userID/likers", listLikersHandler);
 

@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { interactionDislikeHandler } from "./interaction-dislike.handler";
 
-const router = new Router();
+const router = Router();
 
 router.post("/dislike", interactionDislikeHandler);
 

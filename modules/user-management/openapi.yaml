@@ -1,0 +1,449 @@
+openapi: 3.0.3
+info:
+  title: User Management API
+  version: 1.0.0
+  description: OpenAPI specification for user-management module routes.
+servers:
+  - url: /
+tags:
+  - name: Users
+  - name: Prompts
+  - name: Glimpses
+  - name: Interaction
+paths:
+  /users:
+    post:
+      tags: [Users]
+      summary: Create user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserBody"
+      responses:
+        "201":
+          description: User created or existing user returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    get:
+      tags: [Users]
+      summary: List users with filters
+      parameters:
+        - $ref: "#/components/parameters/UserIDQuery"
+        - name: age_range
+          in: query
+          description: Comma-separated age range (e.g. 21,30)
+          schema:
+            type: string
+        - name: distance
+          in: query
+          schema:
+            type: number
+            minimum: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Filtered users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+  /users/{userID}:
+    get:
+      tags: [Users]
+      summary: Get user by ID
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+        - name: fields
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    put:
+      tags: [Users]
+      summary: Update user
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    delete:
+      tags: [Users]
+      summary: Delete user
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+      responses:
+        "200":
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /users/{userID}/prompts:
+    put:
+      tags: [Prompts]
+      summary: Insert prompts in bulk
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InsertPromptsBody"
+      responses:
+        "200":
+          description: Prompts inserted
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /users/{userID}/prompts/{promptID}:
+    put:
+      tags: [Prompts]
+      summary: Update prompt
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+        - $ref: "#/components/parameters/PromptIDPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePromptBody"
+      responses:
+        "200":
+          description: Prompt updated
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    delete:
+      tags: [Prompts]
+      summary: Delete prompt
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+        - $ref: "#/components/parameters/PromptIDPath"
+      responses:
+        "200":
+          description: Prompt deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /users/{userID}/likers:
+    get:
+      tags: [Interaction]
+      summary: List users who liked this user
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+      responses:
+        "200":
+          description: Likers list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+  /users/{userID}/glimpses:
+    get:
+      tags: [Glimpses]
+      summary: List glimpses for user
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+      responses:
+        "200":
+          description: Glimpse list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Glimpse"
+    post:
+      tags: [Glimpses]
+      summary: Create glimpse
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CreateGlimpseBody"
+      responses:
+        "201":
+          description: Glimpse created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Glimpse"
+  /users/{userID}/glimpses/{glimpseID}:
+    delete:
+      tags: [Glimpses]
+      summary: Delete glimpse
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+        - $ref: "#/components/parameters/GlimpseIDPath"
+      responses:
+        "200":
+          description: Glimpse deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /interaction/like:
+    post:
+      tags: [Interaction]
+      summary: Create like interaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InteractionLikeBody"
+      responses:
+        "200":
+          description: Interaction recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /interaction/dislike:
+    post:
+      tags: [Interaction]
+      summary: Create dislike interactions in bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InteractionDislikeBody"
+      responses:
+        "200":
+          description: Interaction recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+components:
+  parameters:
+    UserIDPath:
+      name: userID
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ObjectId"
+    UserIDQuery:
+      name: userID
+      in: query
+      required: true
+      schema:
+        $ref: "#/components/schemas/ObjectId"
+    PromptIDPath:
+      name: promptID
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ObjectId"
+    GlimpseIDPath:
+      name: glimpseID
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ObjectId"
+  schemas:
+    ObjectId:
+      type: string
+      pattern: "^[a-fA-F0-9]{24}$"
+    User:
+      type: object
+      additionalProperties: true
+    Glimpse:
+      type: object
+      additionalProperties: true
+    CreateUserBody:
+      type: object
+      required: [uid]
+      properties:
+        uid:
+          type: string
+          minLength: 1
+    UpdateUserBody:
+      type: object
+      minProperties: 1
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        dob:
+          type: string
+          format: date-time
+        gender:
+          type: string
+        orientation:
+          type: string
+        bio:
+          type: string
+          maxLength: 500
+        event:
+          type: string
+        persona:
+          type: string
+        isActive:
+          type: boolean
+        place_of_birth:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+        location:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [Point]
+            coordinates:
+              type: array
+              minItems: 2
+              maxItems: 2
+              items:
+                type: number
+        interests:
+          type: object
+          properties:
+            coreActivities:
+              type: array
+              items:
+                type: string
+            mediaConsumption:
+              type: array
+              items:
+                type: string
+            lifestyle:
+              type: array
+              items:
+                type: string
+            datingPreferences:
+              type: array
+              items:
+                type: string
+    InsertPromptsBody:
+      type: object
+      required: [prompts]
+      properties:
+        prompts:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [question, answer]
+            properties:
+              question:
+                type: string
+                minLength: 1
+              answer:
+                type: string
+                minLength: 1
+    UpdatePromptBody:
+      type: object
+      required: [prompts]
+      properties:
+        prompts:
+          type: object
+          required: [question, answer]
+          properties:
+            question:
+              type: string
+              minLength: 1
+            answer:
+              type: string
+              minLength: 1
+    CreateGlimpseBody:
+      type: object
+      required: [image]
+      properties:
+        image:
+          type: string
+          format: binary
+        caption:
+          type: string
+          maxLength: 100
+    InteractionLikeBody:
+      type: object
+      required: [from, to]
+      properties:
+        from:
+          $ref: "#/components/schemas/ObjectId"
+        to:
+          $ref: "#/components/schemas/ObjectId"
+        comment:
+          type: object
+          properties:
+            glimpse:
+              $ref: "#/components/schemas/ObjectId"
+            prompt:
+              type: object
+              properties:
+                question:
+                  type: string
+                answer:
+                  type: string
+            answer:
+              type: string
+    InteractionDislikeBody:
+      type: object
+      required: [from, dislikedIds]
+      properties:
+        from:
+          $ref: "#/components/schemas/ObjectId"
+        dislikedIds:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ObjectId"

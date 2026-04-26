@@ -1,5 +1,6 @@
 import mongoose, { HydratedDocument, Schema, InferSchemaType } from "mongoose";
 import mongooseDelete, { SoftDeleteModel } from "mongoose-delete";
+import { getChatDbConnection } from "../../../../../shared/database";
 
 import { encryptChatText } from "../../../utils/chat-crypto";
 
@@ -53,6 +54,10 @@ chatSchema.methods.updateMessage = function (
   return this.save();
 };
 
-const Chat = mongoose.model<TChat, SoftDeleteModel<TChat>>("Chat", chatSchema);
+const chatDb = getChatDbConnection();
+
+const Chat =
+  (chatDb.models.Chat as SoftDeleteModel<TChat>) ||
+  chatDb.model<TChat, SoftDeleteModel<TChat>>("Chat", chatSchema);
 
 export default Chat;

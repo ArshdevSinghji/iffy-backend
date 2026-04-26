@@ -1,5 +1,6 @@
 import mongoose, { Schema, InferSchemaType, HydratedDocument } from "mongoose";
 import mongooseDelete, { SoftDeleteModel } from "mongoose-delete";
+import { getUserDbConnection } from "../../../../../shared/database";
 
 // ─── Schema Definition ────────────────────────────────────────────────────────
 
@@ -37,9 +38,10 @@ glimpseSchema.plugin(mongooseDelete, {
 
 // ─── Model ───────────────────────────────────────────────────────────────────
 
-const Glimpse = mongoose.model<TGlimpse, SoftDeleteModel<TGlimpse>>(
-  "Glimpse",
-  glimpseSchema,
-);
+const userDb = getUserDbConnection();
+
+const Glimpse =
+  (userDb.models.Glimpse as SoftDeleteModel<TGlimpse>) ||
+  userDb.model<TGlimpse, SoftDeleteModel<TGlimpse>>("Glimpse", glimpseSchema);
 
 export default Glimpse;

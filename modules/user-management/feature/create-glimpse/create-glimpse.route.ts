@@ -4,7 +4,7 @@ import multer from "multer";
 import { BadRequestError } from "../../../../shared/errors";
 import { createGlimpseHandler } from "./create-glimpse.handler";
 
-const router = new Router();
+const router = Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),

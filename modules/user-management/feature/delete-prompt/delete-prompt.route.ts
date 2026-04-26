@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { deletePromptHandler } from "./delete-prompt.handler";
 
-const router = new Router();
+const router = Router();
 
 router.delete("/:userID/prompts/:promptID", deletePromptHandler);
 

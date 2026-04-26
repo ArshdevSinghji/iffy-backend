@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { insertPromptsHandler } from "./insert-prompts.handler";
 
-const router = new Router();
+const router = Router();
 
 router.put("/:userID/prompts", insertPromptsHandler);
 

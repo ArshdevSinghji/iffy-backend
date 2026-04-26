@@ -1,0 +1,105 @@
+openapi: 3.0.3
+info:
+  title: Chat Management API
+  version: 1.0.0
+  description: OpenAPI specification for chat-management module routes.
+servers:
+  - url: /
+tags:
+  - name: Chats
+paths:
+  /chats:
+    get:
+      tags: [Chats]
+      summary: List rooms for a user
+      parameters:
+        - name: userID
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/ObjectId"
+      responses:
+        "200":
+          description: Room list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoomSummary"
+  /chats/{roomId}:
+    get:
+      tags: [Chats]
+      summary: List chat messages for a room
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ObjectId"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Paginated chat messages
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [chats, total]
+                properties:
+                  chats:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ChatMessage"
+                  total:
+                    type: integer
+components:
+  schemas:
+    ObjectId:
+      type: string
+      pattern: "^[a-fA-F0-9]{24}$"
+    Partner:
+      type: object
+      additionalProperties: true
+    LastMessage:
+      type: object
+      properties:
+        text:
+          type: string
+        sender_id:
+          oneOf:
+            - $ref: "#/components/schemas/ObjectId"
+            - type: "null"
+        timestamp:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: true
+    RoomSummary:
+      type: object
+      properties:
+        _id:
+          $ref: "#/components/schemas/ObjectId"
+        partner:
+          $ref: "#/components/schemas/Partner"
+        lastMessage:
+          $ref: "#/components/schemas/LastMessage"
+        unreadCount:
+          type: integer
+        isDeleted:
+          type: boolean
+      additionalProperties: true
+    ChatMessage:
+      type: object
+      additionalProperties: true

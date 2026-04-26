@@ -1,4 +1,5 @@
 import mongoose, { Schema, InferSchemaType, HydratedDocument } from "mongoose";
+import { getUserDbConnection } from "../../../../../shared/database";
 
 // ─── Schema Definition ────────────────────────────────────────────────────────
 
@@ -40,9 +41,10 @@ interactionSchema.methods.markAsMatch = function (
 
 // ─── Model ───────────────────────────────────────────────────────────────────
 
-const Interaction = mongoose.model<TInteraction>(
-  "Interaction",
-  interactionSchema,
-);
+const userDb = getUserDbConnection();
+
+const Interaction =
+  userDb.models.Interaction ||
+  userDb.model<TInteraction>("Interaction", interactionSchema);
 
 export default Interaction;

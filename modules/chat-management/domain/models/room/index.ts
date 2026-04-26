@@ -1,4 +1,5 @@
 import mongoose, { HydratedDocument, InferSchemaType, Schema } from "mongoose";
+import { getChatDbConnection } from "../../../../../shared/database";
 
 import { encryptChatText } from "../../../utils/chat-crypto";
 
@@ -120,6 +121,8 @@ roomSchema.methods.deleteRoom = function (this: RoomDocument) {
   return this.save();
 };
 
-const Room = mongoose.model<TRoom>("Room", roomSchema);
+const chatDb = getChatDbConnection();
+
+const Room = chatDb.models.Room || chatDb.model<TRoom>("Room", roomSchema);
 
 export default Room;

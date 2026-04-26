@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
+import jwt, { JwtPayload, TokenExpiredError } from "jsonwebtoken";
 import { AppError } from "./errors";
+import { UnauthorizedError } from "./errors";
 
 // ─── catchErrors ──────────────────────────────────────────────────────────────
 // Wraps async route handlers so you never need try/catch in a handler
@@ -44,3 +46,44 @@ export const globalErrorHandler = (
     message: "An unexpected error occurred",
   });
 };
+
+export type AuthenticatedRequest = Request & {
+  user?: string | JwtPayload;
+};
+
+export const verifyToken = catchErrors(
+  (req: Request, _res: Response, next: NextFunction) => {
+    const authorization = req.headers.authorization;
+
+    if (!authorization) {
+      throw new UnauthorizedError("Missing authorization header");
+    }
+
+    const [scheme, token] = authorization.split(" ");
+    if (scheme !== "Bearer" || !token) {
+      throw new UnauthorizedError("Invalid authorization header format");
+    }
+
+    if (!process.env.JWT_SECRET) {
+      throw new UnauthorizedError("JWT secret is not configured");
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      (req as AuthenticatedRequest).user = decoded;
+
+      if (typeof decoded === "object" && decoded.sub) {
+        req.headers["x-user-id"] = String(decoded.sub);
+      }
+    } catch (error) {
+      if (error instanceof TokenExpiredError) {
+        throw new UnauthorizedError("Token has expired");
+      }
+
+      throw new UnauthorizedError("Invalid token");
+    }
+
+    next();
+  },
+);

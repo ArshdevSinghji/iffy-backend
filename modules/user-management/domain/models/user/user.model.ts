@@ -1,5 +1,6 @@
 import mongoose, { Schema, InferSchemaType, HydratedDocument } from "mongoose";
 import mongooseDelete, { SoftDeleteModel } from "mongoose-delete";
+import { getUserDbConnection } from "../../../../../shared/database";
 
 import {
   Orientation,
@@ -121,6 +122,12 @@ userSchema.plugin(mongooseDelete, { deletedAt: true, overrideMethods: "all" });
 // ─── Model ───────────────────────────────────────────────────────────────────
 
 // Cast to SoftDeleteModel to expose .findDeleted(), .restore(), etc.
-const User = mongoose.model<TUser, SoftDeleteModel<TUser>>("User", userSchema);
+const userDb = getUserDbConnection();
+
+type SoftDeleteUserModel = SoftDeleteModel<UserDocument>;
+
+const User =
+  (userDb.models.User as SoftDeleteUserModel) ||
+  userDb.model("User", userSchema as Schema<UserDocument>);
 
 export default User;

@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { listUsersHandler } from "./list-users.handler";
 
-const router = new Router();
+const router = Router();
 
 router.get("/", listUsersHandler);
 

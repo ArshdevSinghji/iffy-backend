@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { getUserHandler } from "./get-user.handler";
 
-const router = new Router();
+const router = Router();
 
 router.get("/:userID", getUserHandler);
 

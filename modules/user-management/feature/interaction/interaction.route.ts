@@ -5,7 +5,7 @@ import interactionLikeRoute from "../interaction-like/interaction-like.route";
 
 const router = Router();
 
-router.use("/interaction", interactionLikeRoute);
-router.use("/interaction", interactionDislikeRoute);
+router.use("/", interactionLikeRoute);
+router.use("/", interactionDislikeRoute);
 
 export default router;
