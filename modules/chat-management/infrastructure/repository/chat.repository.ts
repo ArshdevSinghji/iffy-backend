@@ -1,47 +1,53 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
-import Chat, { ChatDocument, TChat } from "../../domain/models/chat";
+import Chat, { TChat, ChatDocument } from "../../domain/models/chat";
 
-const findChats = async (criteria: {
-  room_id: string;
+interface FindChatsParams {
+  room_id: Types.ObjectId | string;
   limit: number;
   skip: number;
-}) => {
-  const { room_id, limit, skip } = criteria;
+}
 
-  return Chat.aggregate([
-    { $match: { room_id: new mongoose.Types.ObjectId(room_id) } },
-    {
-      $facet: {
-        chats: [
-          { $sort: { createdAt: -1 } },
-          { $skip: skip },
-          { $limit: limit },
-        ],
-        total: [{ $count: "count" }],
+interface PaginatedChats {
+  chats: TChat[];
+  total: { count: number }[];
+}
+
+class ChatRepositoryClass {
+  async findChats({
+    room_id,
+    limit,
+    skip,
+  }: FindChatsParams): Promise<PaginatedChats[]> {
+    return Chat.aggregate([
+      { $match: { room_id: new Types.ObjectId(room_id) } },
+      {
+        $facet: {
+          chats: [
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+          ],
+          total: [{ $count: "count" }],
+        },
       },
-    },
-  ]);
-};
+    ]);
+  }
 
-const findChatById = async (chatId: string) => {
-  return Chat.findOne({ _id: chatId });
-};
+  async findChatById(chatId: string): Promise<ChatDocument | null> {
+    return Chat.findOne({ _id: chatId });
+  }
 
-const createChat = async (payload: Partial<TChat>) => {
-  const chat = new Chat(payload);
-  return chat.save();
-};
+  async createChat(payload: Partial<TChat>): Promise<ChatDocument> {
+    const chat = new Chat(payload);
+    return chat.save();
+  }
 
-const findLatestMessage = async (room_id: string) => {
-  return Chat.findOne({ room_id }).sort({ createdAt: -1 });
-};
+  async findLatestMessage(
+    room_id: Types.ObjectId | string,
+  ): Promise<ChatDocument | null> {
+    return Chat.findOne({ room_id }).sort({ createdAt: -1 });
+  }
+}
 
-export const ChatRepository = {
-  findChats,
-  findChatById,
-  createChat,
-  findLatestMessage,
-};
-
-export type { ChatDocument };
+export const ChatRepository = new ChatRepositoryClass();

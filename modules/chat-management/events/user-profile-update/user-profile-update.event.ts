@@ -2,9 +2,10 @@
 
 import { RoomRepository } from "../../infrastructure/repository";
 import { getIO } from "../../infrastructure/socket";
+import { ObjectId } from "mongoose";
 
 interface UserProfileUpdatePayload {
-  _id: string;
+  _id: ObjectId;
   name: string;
   persona: string;
 }
@@ -29,12 +30,12 @@ export const handleUserProfileUpdate = async (
 
   rooms.forEach((room) => {
     const { one, two } = room.participants;
-    const partner = one._id.toString() === data._id ? two : one;
+    const partner = one._id.toString() === data._id.toString() ? two : one;
 
     io.to(partner._id.toString()).emit("partner_profile_update", {
       room_id: room._id,
       partner: {
-        _id: data._id,
+        _id: data._id.toString(),
         name: data.name,
         persona: data.persona,
       },

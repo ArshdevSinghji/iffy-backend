@@ -1,26 +1,27 @@
-import Room, { TRoom } from "../../domain/models/room";
+import { FilterQuery } from "mongoose";
+import type { ObjectId } from "mongodb";
 
-const createRoom = async ({
-  roomId,
-  participants,
-}: {
-  roomId: string;
-  participants: TRoom["participants"];
-}) => {
-  const room = new Room({ _id: roomId, participants });
-  return room.save();
-};
+import Room, { TRoom, RoomDocument } from "../../domain/models/room";
 
-const findRoomById = async (roomId: string) => {
-  return Room.findOne({ _id: roomId });
-};
+class RoomRepositoryClass {
+  async createRoom({
+    roomId,
+    participants,
+  }: {
+    roomId: ObjectId;
+    participants: TRoom["participants"];
+  }): Promise<RoomDocument> {
+    const room = new Room({ _id: roomId, participants });
+    return room.save();
+  }
 
-const findRooms = async (criteria: Record<string, unknown>) => {
-  return Room.find(criteria);
-};
+  async findRoomById(roomId: ObjectId | string): Promise<RoomDocument | null> {
+    return Room.findOne({ _id: roomId });
+  }
 
-export const RoomRepository = {
-  createRoom,
-  findRoomById,
-  findRooms,
-};
+  async findRooms(criteria: FilterQuery<TRoom>): Promise<RoomDocument[]> {
+    return Room.find(criteria);
+  }
+}
+
+export const RoomRepository = new RoomRepositoryClass();

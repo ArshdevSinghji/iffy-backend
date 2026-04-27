@@ -1,0 +1,277 @@
+asyncapi: 2.6.0
+info:
+  title: Chat Management Socket API
+  version: 1.0.0
+  description: |
+    AsyncAPI specification for chat-management Socket.IO events.
+
+    Authentication:
+    - Clients must provide a JWT token in `socket.handshake.auth.token`.
+    - The token is validated by server middleware before event handlers are registered.
+
+defaultContentType: application/json
+
+servers:
+  local:
+    url: localhost:8000
+    protocol: ws
+    description: Local development server (Socket.IO over WebSocket/polling)
+    security:
+      - jwtAuth: []
+
+channels:
+  join_room:
+    description: Client joins a chat room and unread count is reset for that user.
+    publish:
+      operationId: joinRoom
+      summary: Client requests to join a room.
+      message:
+        $ref: "#/components/messages/JoinRoomMessage"
+
+  leave_room:
+    description: Client leaves a chat room.
+    publish:
+      operationId: leaveRoom
+      summary: Client requests to leave a room.
+      message:
+        $ref: "#/components/messages/LeaveRoomMessage"
+
+  send_message:
+    description: Client sends a new chat message.
+    publish:
+      operationId: sendMessage
+      summary: Client sends a message to a room.
+      message:
+        $ref: "#/components/messages/SendMessageMessage"
+
+  delete_message:
+    description: Client deletes a message by id.
+    publish:
+      operationId: deleteMessage
+      summary: Client requests message deletion.
+      message:
+        $ref: "#/components/messages/DeleteMessageMessage"
+
+  update_message:
+    description: Client updates message text.
+    publish:
+      operationId: updateMessage
+      summary: Client requests message update.
+      message:
+        $ref: "#/components/messages/UpdateMessageMessage"
+
+  unread_reset:
+    description: Server notifies room unread count reset for the current user.
+    subscribe:
+      operationId: unreadReset
+      summary: Unread state reset notification.
+      message:
+        $ref: "#/components/messages/UnreadResetMessage"
+
+  receive_message:
+    description: Server broadcasts a newly created chat message to room participants.
+    subscribe:
+      operationId: receiveMessage
+      summary: New message event.
+      message:
+        $ref: "#/components/messages/ReceiveMessageMessage"
+
+  notification:
+    description: Server notifies a user about incoming activity from a chat partner.
+    subscribe:
+      operationId: notification
+      summary: Partner notification event.
+      message:
+        $ref: "#/components/messages/NotificationMessage"
+
+  message_deleted:
+    description: Server broadcasts a deleted message id.
+    subscribe:
+      operationId: messageDeleted
+      summary: Message deleted event.
+      message:
+        $ref: "#/components/messages/MessageDeletedMessage"
+
+  message_updated:
+    description: Server broadcasts updated message text.
+    subscribe:
+      operationId: messageUpdated
+      summary: Message updated event.
+      message:
+        $ref: "#/components/messages/MessageUpdatedMessage"
+
+  last_message_updated:
+    description: Server publishes the latest message preview state for room lists.
+    subscribe:
+      operationId: lastMessageUpdated
+      summary: Last message summary updated.
+      message:
+        $ref: "#/components/messages/LastMessageUpdatedMessage"
+
+components:
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Provide JWT via Socket.IO auth payload:
+        `io("<url>", { auth: { token: "<jwt>" } })`.
+
+  messages:
+    JoinRoomMessage:
+      name: JoinRoomMessage
+      payload:
+        $ref: "#/components/schemas/ObjectIdString"
+
+    LeaveRoomMessage:
+      name: LeaveRoomMessage
+      payload:
+        $ref: "#/components/schemas/ObjectIdString"
+
+    SendMessageMessage:
+      name: SendMessageMessage
+      payload:
+        $ref: "#/components/schemas/SendMessagePayload"
+
+    DeleteMessageMessage:
+      name: DeleteMessageMessage
+      payload:
+        $ref: "#/components/schemas/ObjectIdString"
+
+    UpdateMessageMessage:
+      name: UpdateMessageMessage
+      payload:
+        $ref: "#/components/schemas/UpdateMessagePayload"
+
+    UnreadResetMessage:
+      name: UnreadResetMessage
+      payload:
+        $ref: "#/components/schemas/UnreadResetPayload"
+
+    ReceiveMessageMessage:
+      name: ReceiveMessageMessage
+      payload:
+        $ref: "#/components/schemas/ChatMessage"
+
+    NotificationMessage:
+      name: NotificationMessage
+      payload:
+        $ref: "#/components/schemas/Participant"
+
+    MessageDeletedMessage:
+      name: MessageDeletedMessage
+      payload:
+        $ref: "#/components/schemas/ObjectIdString"
+
+    MessageUpdatedMessage:
+      name: MessageUpdatedMessage
+      payload:
+        $ref: "#/components/schemas/MessageUpdatedPayload"
+
+    LastMessageUpdatedMessage:
+      name: LastMessageUpdatedMessage
+      payload:
+        $ref: "#/components/schemas/LastMessagePayload"
+
+  schemas:
+    ObjectIdString:
+      type: string
+      pattern: "^[a-fA-F0-9]{24}$"
+
+    SendMessagePayload:
+      type: object
+      required: [room_id, text]
+      properties:
+        room_id:
+          $ref: "#/components/schemas/ObjectIdString"
+        text:
+          type: string
+          minLength: 1
+      additionalProperties: false
+
+    UpdateMessagePayload:
+      type: object
+      required: [message_id, updated_text]
+      properties:
+        message_id:
+          $ref: "#/components/schemas/ObjectIdString"
+        updated_text:
+          type: string
+          minLength: 1
+      additionalProperties: false
+
+    UnreadResetPayload:
+      type: object
+      required: [room_id]
+      properties:
+        room_id:
+          $ref: "#/components/schemas/ObjectIdString"
+      additionalProperties: false
+
+    Participant:
+      type: object
+      required: [_id, name]
+      properties:
+        _id:
+          $ref: "#/components/schemas/ObjectIdString"
+        name:
+          type: string
+        persona:
+          type: string
+      additionalProperties: false
+
+    ChatMessage:
+      type: object
+      required: [_id, room_id, text, createdAt, updatedAt]
+      properties:
+        _id:
+          $ref: "#/components/schemas/ObjectIdString"
+        room_id:
+          $ref: "#/components/schemas/ObjectIdString"
+        sender_id:
+          $ref: "#/components/schemas/ObjectIdString"
+        text:
+          type: string
+        status:
+          type: string
+          enum: [sent, delivered, read]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      additionalProperties: true
+
+    MessageUpdatedPayload:
+      type: object
+      required: [message_id, text]
+      properties:
+        message_id:
+          $ref: "#/components/schemas/ObjectIdString"
+        text:
+          type: string
+      additionalProperties: false
+
+    LastMessagePayload:
+      type: object
+      required: [room_id, text, unread_count]
+      properties:
+        room_id:
+          $ref: "#/components/schemas/ObjectIdString"
+        text:
+          type: string
+        sender_id:
+          oneOf:
+            - $ref: "#/components/schemas/ObjectIdString"
+            - type: "null"
+        timestamp:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: "null"
+        unread_count:
+          type: integer
+          minimum: 0
+      additionalProperties: false

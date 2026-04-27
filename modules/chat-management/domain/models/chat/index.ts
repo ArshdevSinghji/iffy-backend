@@ -1,8 +1,14 @@
-import mongoose, { HydratedDocument, Schema, InferSchemaType } from "mongoose";
+import { HydratedDocument, Schema, InferSchemaType, Model } from "mongoose";
 import mongooseDelete, { SoftDeleteModel } from "mongoose-delete";
-import { getChatDbConnection } from "../../../../../shared/database";
 
+import { getChatDbConnection } from "../../../../../shared/database";
 import { encryptChatText } from "../../../utils/chat-crypto";
+
+interface ChatMethods {
+  delete(): Promise<unknown>;
+  deleteMessage(): Promise<unknown>;
+  updateMessage(updatedText: string): Promise<unknown>;
+}
 
 const chatSchema = new Schema(
   {
@@ -30,17 +36,8 @@ const chatSchema = new Schema(
 );
 
 export type TChat = InferSchemaType<typeof chatSchema>;
-type ChatMethods = {
-  deleteMessage: () => Promise<unknown>;
-  updateMessage: (updatedText: string) => Promise<unknown>;
-};
 
-export type ChatDocument = HydratedDocument<TChat> & ChatMethods;
-
-chatSchema.plugin(mongooseDelete, {
-  deletedAt: true,
-  overrideMethods: "all",
-});
+export type ChatDocument = HydratedDocument<TChat, ChatMethods>;
 
 chatSchema.methods.deleteMessage = function (this: ChatDocument) {
   return this.delete();
@@ -54,10 +51,14 @@ chatSchema.methods.updateMessage = function (
   return this.save();
 };
 
+chatSchema.plugin(mongooseDelete, { deletedAt: true, overrideMethods: "all" });
+
+type ChatModel = SoftDeleteModel<TChat, Model<TChat>, ChatMethods>;
+
 const chatDb = getChatDbConnection();
 
-const Chat =
-  (chatDb.models.Chat as SoftDeleteModel<TChat>) ||
-  chatDb.model<TChat, SoftDeleteModel<TChat>>("Chat", chatSchema);
+const Chat: ChatModel =
+  (chatDb.models.Chat as ChatModel) ??
+  chatDb.model<TChat, ChatModel>("Chat", chatSchema);
 
 export default Chat;

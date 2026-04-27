@@ -1,9 +1,10 @@
 // ─── event/user-profile-deleted/user-profile-deleted.event.ts ───────────────
 
 import { RoomRepository } from "../../infrastructure/repository";
+import { ObjectId } from "mongoose";
 
 interface UserProfileDeletedPayload {
-  _id: string;
+  _id: ObjectId;
 }
 
 export const handleUserProfileDeleted = async (

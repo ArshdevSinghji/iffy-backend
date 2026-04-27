@@ -1,16 +1,15 @@
-// ─── event/user-match-created/user-match-created.event.ts ───────────────────
-
+import type { ObjectId } from "mongodb";
 import { RoomRepository } from "../../infrastructure/repository";
 import { getIO } from "../../infrastructure/socket";
 
 interface Participant {
-  _id: string;
+  _id: ObjectId;
   name: string;
   persona?: string;
 }
 
 interface UserMatchCreatedPayload {
-  _id: string;
+  _id: ObjectId;
   participants: {
     one: Participant;
     two: Participant;
