@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { NotFoundError } from "../../../../shared/errors";
 import { catchErrors } from "../../../../shared/middleware";
 import { UserRepository } from "../../infrastructure/repository/user.repository";
+import { publishEvent } from "../../infrastructure/message-bus/message-bus.publisher";
 import {
   updateUserBodyValidator,
   updateUserParamsValidator,
@@ -24,6 +25,15 @@ export const updateUserHandler = catchErrors(
     };
 
     await UserRepository.updateUserDetails(params.userID, payload);
+
+    // Publish user profile update event
+    if (body.name || body.persona) {
+      await publishEvent("user.profile.update", {
+        _id: params.userID,
+        name: body.name || user.name || "",
+        persona: body.persona || user.persona || "",
+      });
+    }
 
     res.status(200).json({ message: "User updated successfully" });
   },

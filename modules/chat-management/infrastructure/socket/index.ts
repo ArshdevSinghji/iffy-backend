@@ -1,7 +1,6 @@
 import { Server as HttpServer } from "http";
 import jwt from "jsonwebtoken";
 import { Server, Socket } from "socket.io";
-import { chatHandler } from "../socket/chat.handler";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,9 +30,11 @@ export const initSocket = (server: HttpServer): void => {
 
   io.use(authMiddleware);
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
     const authedSocket = socket as AuthedSocket;
     authedSocket.join(authedSocket.userId);
+    // Lazy-load chatHandler to avoid loading models before DB connection
+    const { chatHandler } = await import("./chat.handler");
     chatHandler(io as Server, authedSocket);
   });
 };

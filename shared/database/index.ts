@@ -84,6 +84,8 @@ export const disconnectDatabases = async (): Promise<void> => {
   chatDbConnection = undefined;
 };
 
+export { getRedis, disconnectRedis } from "./redis";
+
 export const getUserDbConnection = (): Connection => {
   if (!userDbConnection) {
     throw new Error(
