@@ -9,9 +9,10 @@ import listGlimpsesRoute from "./list-glimpses/list-glimpses.route";
 import listLikersRoute from "./list-likers/list-likers.route";
 import listUsersRoute from "./list-users/list-users.route";
 import createGlimpseRoute from "./create-glimpse/create-glimpse.route";
-import interactionRoute from "./interaction/interaction.route";
 import updatePromptRoute from "./update-prompt/update-prompt.route";
 import updateUserRoute from "./update-user/update-user.route";
+import likeInteractionRoute from "./interaction-like/interaction-like.route";
+import dislikeInteractionRoute from "./interaction-dislike/interaction-dislike.route";
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.use("/users", listLikersRoute);
 router.use("/users", listGlimpsesRoute);
 router.use("/users", createGlimpseRoute);
 router.use("/users", deleteGlimpseRoute);
-router.use("/interaction", interactionRoute);
+router.use("/users", likeInteractionRoute);
+router.use("/users", dislikeInteractionRoute);
 
 export default router;

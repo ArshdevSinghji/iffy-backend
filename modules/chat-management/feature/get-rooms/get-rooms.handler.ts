@@ -10,7 +10,6 @@ export const getRoomsHandler = catchErrors(
     const payload = getRoomsSchema.parse({
       params: req.params,
       query: req.query,
-      body: req.body,
     });
 
     const rooms = await RoomRepository.findRooms({

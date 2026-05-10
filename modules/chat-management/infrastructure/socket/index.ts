@@ -25,13 +25,14 @@ export const initSocket = (server: HttpServer): void => {
       credentials: true,
     },
     allowEIO3: true,
-    transports: ["polling"],
+    transports: ["websocket", "polling"],
   });
 
   io.use(authMiddleware);
 
   io.on("connection", async (socket) => {
     const authedSocket = socket as AuthedSocket;
+
     authedSocket.join(authedSocket.userId);
     // Lazy-load chatHandler to avoid loading models before DB connection
     const { chatHandler } = await import("./chat.handler");
@@ -53,7 +54,10 @@ const authMiddleware = (socket: Socket, next: (err?: Error) => void): void => {
       return next(new Error("Authentication error: invalid token"));
     }
 
-    (socket as AuthedSocket).userId = String((decoded as { sub?: string }).sub);
+    const decodedToken = decoded as { id?: string; sub?: string };
+    (socket as AuthedSocket).userId = String(
+      decodedToken.id || decodedToken.sub,
+    );
     next();
   });
 };

@@ -8,6 +8,7 @@ import {
   updateUserBodyValidator,
   updateUserParamsValidator,
 } from "./update-user.validator";
+import type { TUser } from "../../domain/models/user/user.model";
 
 export const updateUserHandler = catchErrors(
   async (req: Request, res: Response) => {
@@ -22,7 +23,7 @@ export const updateUserHandler = catchErrors(
     const payload = {
       ...body,
       isProfileComplete: user.isProfileComplete ? user.isProfileComplete : true,
-    };
+    } as Partial<TUser>;
 
     await UserRepository.updateUserDetails(params.userID, payload);
 

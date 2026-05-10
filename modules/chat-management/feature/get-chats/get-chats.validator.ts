@@ -12,5 +12,4 @@ export const getChatsSchema = z.object({
     limit: z.coerce.number().int().positive().optional(),
     page: z.coerce.number().int().positive().optional(),
   }),
-  body: z.object({}),
 });

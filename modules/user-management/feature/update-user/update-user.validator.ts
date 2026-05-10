@@ -47,6 +47,16 @@ export const updateUserBodyValidator = z
         datingPreferences: z.array(z.nativeEnum(DatingPreferences)).optional(),
       })
       .optional(),
+    prompts: z
+      .array(
+        z
+          .object({
+            question: z.string().min(1).max(300),
+            answer: z.string().max(1000),
+          })
+          .strict(),
+      )
+      .optional(),
   })
   .strip()
   .refine(

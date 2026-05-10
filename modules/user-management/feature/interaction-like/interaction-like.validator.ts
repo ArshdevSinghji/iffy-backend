@@ -5,8 +5,10 @@ const mongoIdSchema = z
   .regex(/^[a-f\d]{24}$/i, "must be a valid MongoDB ObjectId");
 
 export const interactionLikeBodyValidator = z.object({
-  from: mongoIdSchema,
-  to: mongoIdSchema,
+  params: z.object({
+    userID: mongoIdSchema,
+    profileID: mongoIdSchema,
+  }),
   comment: z
     .object({
       glimpse: mongoIdSchema.optional(),

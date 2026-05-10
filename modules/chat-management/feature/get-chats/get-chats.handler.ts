@@ -10,7 +10,6 @@ export const getChatsHandler = catchErrors(
     const payload = getChatsSchema.parse({
       params: req.params,
       query: req.query,
-      body: req.body,
     });
 
     const { roomId } = payload.params;

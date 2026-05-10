@@ -29,7 +29,10 @@ export const createUserHandler = catchErrors(
       return;
     }
 
-    const user = await UserRepository.create({ uid: body.uid });
+    const user = await UserRepository.create({
+      uid: body.uid,
+      email: body.email,
+    });
     const token = createToken({
       id: user._id,
       isProfileComplete: user.isProfileComplete,

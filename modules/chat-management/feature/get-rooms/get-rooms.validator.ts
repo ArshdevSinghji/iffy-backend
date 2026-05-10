@@ -9,5 +9,4 @@ export const getRoomsSchema = z.object({
   query: z.object({
     userID: objectIdSchema,
   }),
-  body: z.object({}),
 });

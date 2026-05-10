@@ -33,14 +33,9 @@ const createInteraction = async (payload: Partial<TInteraction>) => {
   return interaction.save();
 };
 
-const bulkCreateInteraction = async (payloads: Partial<TInteraction>[]) => {
-  return Interaction.insertMany(payloads);
-};
-
 export const InteractionRepository = {
   findMatch,
   findUserInteractions,
   findInteractionsOnUser,
   createInteraction,
-  bulkCreateInteraction,
 };

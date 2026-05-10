@@ -26,7 +26,7 @@ const findById = async (
   fields?: UserFields,
 ): Promise<Partial<TUser> | null> => {
   return User.findById(userID)
-    .select(fields ?? "")
+    .select(fields ? `${fields} -_id` : "")
     .lean();
 };
 

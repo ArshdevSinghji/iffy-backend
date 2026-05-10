@@ -267,12 +267,15 @@ paths:
           $ref: "#/components/responses/NotFoundResponse"
         "500":
           $ref: "#/components/responses/InternalServerErrorResponse"
-  /interaction/like:
+  /users/{userID}/like/{profileID}:
     post:
       tags: [Interaction]
       summary: Create like interaction
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+        - $ref: "#/components/parameters/ProfileIDPath"
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
@@ -286,16 +289,13 @@ paths:
                 $ref: "#/components/schemas/InteractionRecordedResponse"
         "500":
           $ref: "#/components/responses/InternalServerErrorResponse"
-  /interaction/dislike:
+  /users/{userID}/dislike/{profileID}:
     post:
       tags: [Interaction]
-      summary: Create dislike interactions in bulk
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/InteractionDislikeBody"
+      summary: Create dislike interaction
+      parameters:
+        - $ref: "#/components/parameters/UserIDPath"
+        - $ref: "#/components/parameters/ProfileIDPath"
       responses:
         "200":
           description: Interaction recorded
@@ -335,6 +335,12 @@ components:
     UserIDQuery:
       name: userID
       in: query
+      required: true
+      schema:
+        $ref: "#/components/schemas/ObjectId"
+    ProfileIDPath:
+      name: profileID
+      in: path
       required: true
       schema:
         $ref: "#/components/schemas/ObjectId"
@@ -648,12 +654,7 @@ components:
           maxLength: 100
     InteractionLikeBody:
       type: object
-      required: [from, to]
       properties:
-        from:
-          $ref: "#/components/schemas/ObjectId"
-        to:
-          $ref: "#/components/schemas/ObjectId"
         comment:
           type: object
           properties:
@@ -668,14 +669,3 @@ components:
                   type: string
             answer:
               type: string
-    InteractionDislikeBody:
-      type: object
-      required: [from, dislikedIds]
-      properties:
-        from:
-          $ref: "#/components/schemas/ObjectId"
-        dislikedIds:
-          type: array
-          minItems: 1
-          items:
-            $ref: "#/components/schemas/ObjectId"
