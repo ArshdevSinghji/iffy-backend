@@ -15,8 +15,9 @@ import {
 
 const userSchema = new Schema(
   {
-    userID: { type: String, required: true, unique: true },
+    uid: { type: String, required: true, unique: true },
     name: { type: String, default: null },
+    email: { type: String, default: null },
     dob: { type: Date, default: null },
 
     place_of_birth: {

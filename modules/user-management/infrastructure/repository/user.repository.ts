@@ -17,8 +17,8 @@ interface PromptInput {
 
 // ─── Finders ─────────────────────────────────────────────────────────────────
 
-const findByUserID = async (userID: string): Promise<UserDocument | null> => {
-  return User.findOne({ userID });
+const findByUID = async (uid: string): Promise<UserDocument | null> => {
+  return User.findOne({ uid });
 };
 
 const findById = async (
@@ -103,7 +103,7 @@ const deletePrompt = async (
 // ─── Export ───────────────────────────────────────────────────────────────────
 
 export const UserRepository = {
-  findByUserID,
+  findByUID,
   findById,
   getFilteredUsers,
   findPromptById,

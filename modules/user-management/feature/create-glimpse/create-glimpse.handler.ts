@@ -9,6 +9,7 @@ import {
   createGlimpseBodyValidator,
   createGlimpseParamsValidator,
 } from "./create-glimpse.validator";
+import mongoose from "mongoose";
 
 export const createGlimpseHandler = catchErrors(
   async (req: Request, res: Response) => {
@@ -41,12 +42,12 @@ export const createGlimpseHandler = catchErrors(
     const fileName = `glimpses/${params.userID}-${Date.now()}.webp`;
     const imageURL = await uploadToR2(optimizedBuffer, fileName);
 
-    const glimpse = await GlimpseRepository.createGlimpse({
-      userID: params.userID,
+    await GlimpseRepository.createGlimpse({
+      userID: new mongoose.Types.ObjectId(params.userID),
       imageURL,
       caption: body.caption,
     });
 
-    res.status(201).json(glimpse);
+    res.status(201).json({ message: "Glimpse created successfully" });
   },
 );

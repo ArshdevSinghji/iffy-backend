@@ -8,7 +8,7 @@ servers:
 tags:
   - name: Chats
 paths:
-  /chats:
+  /rooms:
     get:
       tags: [Chats]
       summary: List rooms for a user
@@ -29,7 +29,7 @@ paths:
                   $ref: "#/components/schemas/RoomSummary"
         "500":
           $ref: "#/components/responses/InternalServerErrorResponse"
-  /chats/{roomId}:
+  /rooms/{roomId}/chats:
     get:
       tags: [Chats]
       summary: List chat messages for a room

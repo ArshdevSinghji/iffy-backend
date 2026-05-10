@@ -40,7 +40,6 @@ const getPort = (): number => {
 const bootstrap = async () => {
   await connectDatabases();
 
-  // Initialize message-bus worker asynchronously (non-blocking)
   (async () => {
     try {
       const { createUserEventsWorker } =

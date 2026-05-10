@@ -5,7 +5,7 @@ import getRoomsRoute from "./get-rooms/get-rooms.route";
 
 const router = Router();
 
-router.use("/chats", getRoomsRoute);
-router.use("/chats", getChatsRoute);
+router.use("/rooms", getRoomsRoute);
+router.use("/rooms", getChatsRoute);
 
 export default router;
