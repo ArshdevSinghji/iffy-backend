@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import { Request, Response } from "express";
 import { createUserValidator } from "./create-user.validator";
 import { UserRepository } from "../../infrastructure/repository/user.repository";
@@ -9,9 +9,11 @@ const createToken = (payload: {
   id: mongoose.Types.ObjectId;
   isProfileComplete: boolean;
 }) => {
-  return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "24h",
-  });
+  const expiresIn = process.env.JWT_EXPIRES_IN || "24h";
+  const options: SignOptions = {
+    expiresIn: expiresIn as SignOptions["expiresIn"],
+  };
+  return jwt.sign(payload, process.env.JWT_SECRET as string, options);
 };
 
 export const createUserHandler = catchErrors(

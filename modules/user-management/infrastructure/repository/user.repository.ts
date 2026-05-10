@@ -5,7 +5,7 @@ import User, { TUser, UserDocument } from "../../domain/models/user/user.model";
 
 type UserFields = ProjectionType<TUser>;
 
-interface PaginatedCriteria extends FilterQuery<TUser> {
+interface PaginatedCriteria extends FilterQuery<UserDocument> {
   limit: number;
   skip: number;
 }
@@ -33,8 +33,21 @@ const findById = async (
 const getFilteredUsers = async (
   criteria: PaginatedCriteria,
 ): Promise<UserDocument[]> => {
-  const { limit, skip, ...filters } = criteria;
-  return User.find(filters).limit(limit).skip(skip);
+  const { limit, skip } = criteria;
+  const {
+    limit: _l,
+    skip: _s,
+    ...rest
+  } = criteria as unknown as Record<string, unknown>;
+  const filters = rest as FilterQuery<TUser>;
+
+  // TS: Mongoose query overloads can be fragile with complex schema-derived
+  // filter types (especially maps / subdocument arrays). Narrowing to
+  // `any` here keeps the call safe at runtime while keeping the repository
+  // surface typed. This is a narrow, intentional assertion.
+  return User.find(filters as unknown as any)
+    .limit(limit)
+    .skip(skip);
 };
 
 // ─── Prompt Finders ───────────────────────────────────────────────────────────
